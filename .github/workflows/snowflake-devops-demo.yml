@@ -22,22 +22,30 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  Development:
-    # The type of runner that the job will run on
-    environment: Dev
-    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+  Build:
+    runs-on: ubuntu-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
         - name: Checkout repository
+          id: check_out
           uses: actions/checkout@v2
 
         - name: Use Python 3.8.x
           uses: actions/setup-python@v2.2.1
           with:
            python-version: 3.8.x
+    outputs:
+      GITHUB_WORKSPACE: ${{ steps.check_out.outputs.GITHUB_WORKSPACE }}
 
+  Development:
+    # The type of runner that the job will run on
+    needs: Build
+    environment: Dev
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
         - name: Run schemachange
           env:
             SF_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
@@ -47,10 +55,10 @@ jobs:
             SF_DATABASE: ${{ secrets.SNOWFLAKE_DB }}
             SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASS }}
           run: |
-            echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+            echo "GITHUB_WORKSPACE: ${{ needs.Build.outputs.GITHUB_WORKSPACE }}"
             python --version
             echo "Step 1: Installing schemachange"
             pip install schemachange
 
             echo "Step 2: Running schemachange"
-            schemachange -f $GITHUB_WORKSPACE/migrations -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            schemachange -f ${{ needs.Build.outputs.GITHUB_WORKSPACE }}/migrations -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
