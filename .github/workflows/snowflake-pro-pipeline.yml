@@ -1,5 +1,4 @@
 # Snowflake Production Pipeline
-
 name: snowflake-pro-pipeline
 
 # Controls when the workflow will run
