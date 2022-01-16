@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Development:
+  Production:
     environment: Pro
     runs-on: ubuntu-latest
 
