@@ -22,7 +22,7 @@ jobs:
   # This workflow contains a single job called "build"
   Development:
     # The type of runner that the job will run on
-    environment: Dev
+    environment: Pro
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
